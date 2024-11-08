@@ -1165,6 +1165,7 @@ enum IRQ_NUMBER_t {
 #define SIM_SOPT9_TPM2CH0SRC(n)		(uint32_t)(((n) & 3) << 20)	// TPM2 channel 0 input capture source select
 #define SIM_SOPT9_TPM1CH0SRC(n)		(uint32_t)(((n) & 3) << 18)	// TPM1 channel 0 input capture source select
 #define SIM_SDID		(*(const uint32_t *)0x40048024)    // System Device Identification Register
+#define SIM_SCGC1_ADDRESS	(0x40048028)
 #define SIM_SCGC1		(*(volatile uint32_t *)0x40048028) // System Clock Gating Control Register 1
 #define SIM_SCGC1_UART5			((uint32_t)0x00000800)		// UART5 Clock Gate Control
 #define SIM_SCGC1_UART4			((uint32_t)0x00000400)		// UART4 Clock Gate Control
@@ -1190,6 +1191,7 @@ enum IRQ_NUMBER_t {
 #define SIM_SCGC3_USBHSPHY		((uint32_t)0x00000004)		// USBHSPHY Clock Gate Control
 #define SIM_SCGC3_USBHS			((uint32_t)0x00000002)		// USBHS Clock Gate Control
 //#define SIM_SCGC3_RNGA		((uint32_t)0x00000001)		// RNGA Clock on APIS1 (base addr 400A0000)
+#define SIM_SCGC4_ADDRESS	(0x40048034)
 #define SIM_SCGC4		(*(volatile uint32_t *)0x40048034) // System Clock Gating Control Register 4
 #define SIM_SCGC4_VREF			((uint32_t)0x00100000)		// VREF Clock Gate Control
 #define SIM_SCGC4_CMP			((uint32_t)0x00080000)		// Comparator Clock Gate Control
@@ -4386,7 +4388,8 @@ typedef struct {
 	volatile uint32_t	TXFR[16]; // 3c
 	volatile uint32_t	RXFR[16]; // 7c
 } KINETISK_SPI_t;
-#define KINETISK_SPI0		(*(KINETISK_SPI_t *)0x4002C000)
+#define KINETISK_SPI0_ADDR	(0x4002C000)
+#define KINETISK_SPI0		(*(KINETISK_SPI_t *)KINETISK_SPI0_ADDR)
 #define SPI0_MCR		(KINETISK_SPI0.MCR)	// DSPI Module Configuration Register
 #define SPI_MCR_MSTR			((uint32_t)0x80000000)		// Master/Slave Mode Select
 #define SPI_MCR_CONT_SCKE		((uint32_t)0x40000000)		//
@@ -4455,7 +4458,8 @@ typedef struct {
 #define SPI0_RXFR3		(KINETISK_SPI0.RXFR[3])	// DSPI Receive FIFO Registers
 
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-#define KINETISK_SPI1		(*(KINETISK_SPI_t *)0x4002D000)
+#define KINETISK_SPI1_ADDR	(0x4002D000)
+#define KINETISK_SPI1		(*(KINETISK_SPI_t *)KINETISK_SPI1_ADDR)
 #define SPI1_MCR		(KINETISK_SPI1.MCR)	// DSPI Module Configuration Register
 #define SPI1_TCR		(KINETISK_SPI1.TCR)	// DSPI Transfer Count Register
 #define SPI1_CTAR0		(KINETISK_SPI1.CTAR0)	// DSPI Clock and Transfer Attributes Register, In Master Mode
@@ -4475,7 +4479,8 @@ typedef struct {
 #define SPI1_RXFR2		(KINETISK_SPI1.RXFR[2])	// DSPI Receive FIFO Registers
 #define SPI1_RXFR3		(KINETISK_SPI1.RXFR[3])	// DSPI Receive FIFO Registers
 
-#define KINETISK_SPI2		(*(KINETISK_SPI_t *)0x400AC000)
+#define KINETISK_SPI2_ADDR	(0x400AC000)
+#define KINETISK_SPI2		(*(KINETISK_SPI_t *)KINETISK_SPI2_ADDR)
 #define SPI2_MCR		(KINETISK_SPI2.MCR)	// DSPI Module Configuration Register
 #define SPI2_TCR		(KINETISK_SPI2.TCR)	// DSPI Transfer Count Register
 #define SPI2_CTAR0		(KINETISK_SPI2.CTAR0)	// DSPI Clock and Transfer Attributes Register, In Master Mode
@@ -4511,8 +4516,10 @@ typedef struct {
 	volatile uint8_t	CI;
 	volatile uint8_t	C3;
 } KINETISL_SPI_t;
-#define KINETISL_SPI0		(*(KINETISL_SPI_t *)0x40076000)
-#define KINETISL_SPI1		(*(KINETISL_SPI_t *)0x40077000)
+#define KINETISL_SPI0_ADDR	(0x40076000)
+#define KINETISL_SPI1_ADDR	(0x40077000)
+#define KINETISL_SPI0		(*(KINETISL_SPI_t *)KINETISL_SPI0_ADDR)
+#define KINETISL_SPI1		(*(KINETISL_SPI_t *)KINETISL_SPI1_ADDR)
 #define SPI0_S			(KINETISL_SPI0.S)		// Status
 #define SPI_S_SPRF			((uint8_t)0x80)			// Read Buffer Full Flag
 #define SPI_S_SPMF			((uint8_t)0x40)			// Match Flag
@@ -4592,10 +4599,14 @@ typedef struct {
 	volatile uint8_t	SLTH;
 	volatile uint8_t	SLTL;
 } KINETIS_I2C_t;
-#define KINETIS_I2C0		(*(KINETIS_I2C_t *)0x40066000)
-#define KINETIS_I2C1		(*(KINETIS_I2C_t *)0x40067000)
-#define KINETIS_I2C2		(*(KINETIS_I2C_t *)0x400E6000)
-#define KINETIS_I2C3		(*(KINETIS_I2C_t *)0x400E7000)
+#define KINETIS_I2C0_ADDRESS	(0x40066000)
+#define KINETIS_I2C1_ADDRESS	(0x40067000)
+#define KINETIS_I2C2_ADDRESS	(0x400E6000)
+#define KINETIS_I2C3_ADDRESS	(0x400E7000)
+#define KINETIS_I2C0		(*(KINETIS_I2C_t *)KINETIS_I2C0_ADDRESS)
+#define KINETIS_I2C1		(*(KINETIS_I2C_t *)KINETIS_I2C1_ADDRESS)
+#define KINETIS_I2C2		(*(KINETIS_I2C_t *)KINETIS_I2C2_ADDRESS)
+#define KINETIS_I2C3		(*(KINETIS_I2C_t *)KINETIS_I2C3_ADDRESS)
 #define I2C0_A1			(KINETIS_I2C0.A1)		// I2C Address Register 1
 #define I2C0_F			(KINETIS_I2C0.F)		// I2C Frequency Divider register
 #define I2C_F_DIV20			((uint8_t)0x00)

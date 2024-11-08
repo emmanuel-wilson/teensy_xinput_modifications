@@ -59,8 +59,9 @@ const uint8_t pin_to_channel[] = { // pg 482
 static void wait_for_cal(void)
 {
 	//printf("wait_for_cal\n");
-	while (ADC1_GC & ADC_GC_CAL) ;
-	while (ADC2_GC & ADC_GC_CAL) ;
+	while ((ADC1_GC & ADC_GC_CAL) || (ADC2_GC & ADC_GC_CAL)) {
+		yield();
+	}
 	// TODO: check CALF, but what do to about CAL failure?
 	calibrating = 0;
 	//printf("cal complete\n");
@@ -69,24 +70,41 @@ static void wait_for_cal(void)
 
 int analogRead(uint8_t pin)
 {
+	// TODO: what happens if a program calls analogRead() from both main
+	// program and interrupts?  On Teensy 3.x this came up and code was
+	// added to allow analogRead() to work (or at least not hang) in
+	// when used from interrupts & main program.
 	if (pin > sizeof(pin_to_channel)) return 0;
 	if (calibrating) wait_for_cal();
 	uint8_t ch = pin_to_channel[pin];
 	if (ch == 255) return 0;
+	// check if pin has input "keeper"
+	volatile uint32_t *pad = portControlRegister(pin);
+	uint32_t padval = *pad;
+	if ((padval & (IOMUXC_PAD_PUE | IOMUXC_PAD_PKE)) == IOMUXC_PAD_PKE) {
+		// disable keeper, as it messes up analog with higher source impedance
+		// but don't touch user's setting if ordinary pullup, which some
+		// people use together with capacitors or other circuitry
+		*pad = padval & ~IOMUXC_PAD_PKE;
+	}
 //	printf("%d\n", ch);
 //	if (ch > 15) return 0;
 	if(!(ch & 0x80)) {
 		ADC1_HC0 = ch;
-		while (!(ADC1_HS & ADC_HS_COCO0)) ; // wait
+		while (!(ADC1_HS & ADC_HS_COCO0)) {
+			yield(); // TODO: what happens if yield-called code uses analogRead()
+		}
 		return ADC1_R0;
 	} else {
 		ADC2_HC0 = ch & 0x7f;
-		while (!(ADC2_HS & ADC_HS_COCO0)) ; // wait
+		while (!(ADC2_HS & ADC_HS_COCO0)) {
+			yield(); // TODO: what happens if yield-called code uses analogRead()
+		}
 		return ADC2_R0;
 	}
 }
 
-void analogReference(uint8_t type)
+void analogReference(uint8_t type __attribute__((unused)))
 {
 }
 
@@ -211,13 +229,17 @@ FLASHMEM void analog_init(void)
 	ADC1_CFG = mode | ADC_CFG_ADHSC;
 	ADC1_GC = avg | ADC_GC_CAL;		// begin cal
 	calibrating = 1;
-	while (ADC1_GC & ADC_GC_CAL) ;
+	while (ADC1_GC & ADC_GC_CAL) {
+		//yield();
+	}
 	calibrating = 0;
 	//ADC2
 	ADC2_CFG = mode | ADC_CFG_ADHSC;
 	ADC2_GC = avg | ADC_GC_CAL;		// begin cal
 	calibrating = 1;
-	while (ADC2_GC & ADC_GC_CAL) ;
+	while (ADC2_GC & ADC_GC_CAL) {
+		//yield();
+	}
 	calibrating = 0;
 }
 
