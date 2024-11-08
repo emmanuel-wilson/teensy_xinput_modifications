@@ -1,11 +1,32 @@
-*.elf
+# Prerequisites
 *.d
-*.hex
+
+# Compiled Object files
+*.slo
+*.lo
 *.o
-nbproject
-*~
-*.bak
-*.BAK
-*.orig
-*.tmp
-*.TMP
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
