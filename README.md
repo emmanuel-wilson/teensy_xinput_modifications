@@ -6,8 +6,10 @@ https://community.platformio.org/t/how-to-modify-teensy-core-files/7425/16
 
 This repo is meant to be taken by platformio to replace the core libs used in default Teensy to allow for Xinput
 
+Followed the architecture and implementation of: 
+https://github.com/spinorkit/pio-arduinoteensy/tree/main
 
-Original repo: 
+Replaced the core lib with the most up to date teensy libs: 
 https://github.com/PaulStoffregen/cores/tree/master
 
 MODIFIED FROM ORIGINAL: deleted the teensy3 folder to make things lighter and avoid conflicts
